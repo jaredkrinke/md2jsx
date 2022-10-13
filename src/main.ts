@@ -12,7 +12,6 @@ function escapeTemplateLiteral(text: string): string {
     ;
 }
 
-
 const renderer = new marked.Renderer();
 
 // Escape braces

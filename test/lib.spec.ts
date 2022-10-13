@@ -1,12 +1,14 @@
 import { markdownToJSX } from "../src/lib";
 import * as assert from "assert";
 
+const prefix = "// Auto-generated using md2jsx\n\n";
+
 function createExpected(jsx: string): string {
-    return `export default <>\n${jsx}\n</>;\n`;
+    return `${prefix}export default <>\n${jsx}\n</>;\n`;
 }
 
 function createExpectedTemplate(jsx: string): string {
-    return `export default context => <>\n${jsx}\n</>;\n`;
+    return `${prefix}export default (context = null) => <>\n${jsx}\n</>;\n`;
 }
 
 describe("md2jsx", function () {
@@ -35,7 +37,7 @@ for (let i = 0; i < array.length; i++) {
     });
 
     it("Substitution", function() {
-        assert.equal(markdownToJSX("Hello, {{name}}!", { template: true }), createExpectedTemplate("<p>Hello, {context.name}!</p>"));
+        assert.equal(markdownToJSX("Hello, {{name}}!", { template: true }), createExpectedTemplate("<p>Hello, {context?.name}!</p>"));
     });
 
     // TODO: Look into supporting these, if needed

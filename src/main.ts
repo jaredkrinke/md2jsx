@@ -21,11 +21,48 @@ renderer.codespan = text => `<code>${escapeBraces(text)}</code>`;
 // Escape code blocks to preserve whitespace
 renderer.code = code => `<pre><code>{\`${escapeTemplateLiteral(code)}\`}</code></pre>\n`;
 
-const options: marked.MarkedOptions = {
+const markedOptionsDefault: marked.MarkedOptions = {
     renderer,
     xhtml: true,
 };
 
-export function markdownToJSX(md: string): string {
-    return `export default <>\n${marked.parse(md, options)}</>;\n`;
+export interface MarkdownToJSXOptions {
+    template?: boolean;
+}
+
+export const defaultOptions: MarkdownToJSXOptions = {
+    template: false,
+};
+
+export function markdownToJSX(md: string, options?: MarkdownToJSXOptions): string {
+    if (options?.template) {
+        marked.setOptions(marked.getDefaults());
+        marked.setOptions(markedOptionsDefault);
+        marked.use({
+            extensions: [
+                {
+                    name: "sub",
+                    level: "inline",
+                    start: (src) => src.match(/[{][{]/)?.index,
+                    tokenizer: (src) => {
+                        const rule = /^[{][{](.*?)[}][}]/;
+                        const match = rule.exec(src);
+                        if (match) {
+                            return {
+                                type: "sub",
+                                raw: match[0],
+                                subName: match[1],
+                            };
+                        }
+                    },
+                    renderer: (token) => `{context.${token.subName}}`,
+                },
+            ],
+        });
+        return `export default context => <>\n${marked.parse(md)}</>;\n`;
+    } else {
+        marked.setOptions(marked.getDefaults());
+        marked.setOptions(markedOptionsDefault);
+        return `export default <>\n${marked.parse(md)}</>;\n`;
+    }
 }

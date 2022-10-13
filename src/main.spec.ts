@@ -5,6 +5,10 @@ function createExpected(jsx: string): string {
     return `export default <>\n${jsx}\n</>;\n`;
 }
 
+function createExpectedTemplate(jsx: string): string {
+    return `export default context => <>\n${jsx}\n</>;\n`;
+}
+
 describe("md2jsx", function () {
     it("One paragraph", function () {
         assert.equal(markdownToJSX("Hi"), createExpected("<p>Hi</p>"));
@@ -28,5 +32,17 @@ for (let i = 0; i < array.length; i++) {
     console.log(\`<\${array[i]}>\`);
 }
 \`\`\``), createExpected("<pre><code>{`for (let i = 0; i < array.length; i++) {\n    console.log(\\`<\\${array[i]}>\\`);\n}`}</code></pre>"));
+    });
+
+    it("Substitution", function() {
+        assert.equal(markdownToJSX("Hello, {{name}}!", { template: true }), createExpectedTemplate("<p>Hello, {context.name}!</p>"));
+    });
+
+    it("Substitution in inline code", function() {
+        assert.equal(markdownToJSX("`Hello, {{name}}!`", { template: true }), createExpectedTemplate("<p><code>Hello, {context.name}!</code></p>"));
+    });
+
+    it("Substitution in fenced code", function() {
+        assert.equal(markdownToJSX("```\nHello, {{name}}!\n```", { template: true }), createExpectedTemplate("<pre><code>Hello, {context.name}!</code></pre>"));
     });
 });

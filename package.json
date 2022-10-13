@@ -1,7 +1,13 @@
 {
   "name": "md2jsx",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Build-time Markdown-to-JSX conversion",
+  "keywords": [
+    "markdown",
+    "build"
+  ],
+  "homepage": "https://github.com/jaredkrinke/md2jsx",
+  "license": "MIT",
   "main": "dist/lib.js",
   "bin": "dist/cmd.js",
   "files": [

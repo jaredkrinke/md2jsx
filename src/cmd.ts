@@ -1,5 +1,5 @@
 import { readFileSync, writeFileSync } from "fs";
-import { markdownToJSX } from "./main";
+import { markdownToJSX } from "./lib";
 
 const markdownInput = readFileSync(0, "utf-8");
 writeFileSync(1, markdownToJSX(markdownInput, {

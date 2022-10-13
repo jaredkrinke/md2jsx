@@ -2,8 +2,15 @@
   "name": "md2jsx",
   "version": "0.0.1",
   "description": "Build-time Markdown-to-JSX conversion",
+  "main": "dist/lib.js",
+  "bin": "dist/cmd.js",
+  "files": [
+    "dist/*.js",
+    "dist/*.d.ts"
+  ],
   "scripts": {
-    "test": "mocha --require ts-node/register src/*.spec.ts"
+    "build": "tsc",
+    "test": "mocha --require ts-node/register test/*.spec.ts"
   },
   "dependencies": {
     "@types/marked": "^4.0.7",

@@ -1,4 +1,4 @@
-import { markdownToJSX } from "./main";
+import { markdownToJSX } from "../src/lib";
 import * as assert from "assert";
 
 function createExpected(jsx: string): string {

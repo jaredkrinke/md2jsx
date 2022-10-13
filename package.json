@@ -1,6 +1,6 @@
 {
   "name": "md2jsx",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Build-time Markdown-to-JSX conversion",
   "main": "dist/lib.js",
   "bin": "dist/cmd.js",

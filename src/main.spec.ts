@@ -23,6 +23,6 @@ describe("md2jsx", function () {
 for (let i = 0; i < array.length; i++) {
     console.log(\`<\${array[i]}>\`);
 }
-\`\`\``), "const codeBlock1 = `for (let i = 0; i < array.length; i++) {\n    console.log(\\`<\\${array[i]}>\\`);\n}\n`;\nexport default <>\n<pre><code>{codeBlock1}</code></pre>\n</>;\n");
+\`\`\``), "export default <>\n<pre><code>{`for (let i = 0; i < array.length; i++) {\n    console.log(\\`<\\${array[i]}>\\`);\n}`}</code></pre>\n</>;\n");
     });
 });

@@ -86,7 +86,7 @@ export default (context = null) => <>
 </>;
 ```
 
-The template is exported as an arrow function that taxes a JavaScript object whose properties are inserted when `{{property}}` is encountered in the Markdown input. Here's how to use the export from above (assuming it's in `template.tsx` and is being used from TypeScript):
+The template is exported as an arrow function that takes a JavaScript object whose properties are inserted when `{{property}}` is encountered in the Markdown input. Here's how to use the export from above (assuming it's in `template.tsx` and is being used from TypeScript):
 
 ```tsx
 import { default as template } from "./template";

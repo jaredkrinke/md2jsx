@@ -12,6 +12,22 @@ function escapeTemplateLiteral(text: string): string {
     ;
 }
 
+function parseFrontMatter(text: string, parseYaml: (str: string) => Record<string, any>): { metadata: Record<string, any>, markdown: string } {
+    let metadata: Record<string, any> = {};
+    let markdown = text;
+
+    const frontMatterPattern = /^---\r?\n(.*?)\r?\n---(\r?\n|$)/ms;
+    const matches = frontMatterPattern.exec(text);
+    if (matches) {
+        // Front matter found; parse it
+        const frontMatter = matches[1];
+        markdown = text.replace(matches[0], "");
+        metadata = parseYaml(frontMatter);
+    }
+
+    return { metadata, markdown };
+}
+
 const renderer = new marked.Renderer();
 
 // Escape braces
@@ -28,6 +44,7 @@ const markedOptionsDefault: marked.MarkedOptions = {
 
 export interface MarkdownToJSXOptions {
     template?: boolean;
+    parseFrontMatter?: (str: string) => Record<string, any>;
 }
 
 export const defaultOptions: MarkdownToJSXOptions = {
@@ -36,7 +53,31 @@ export const defaultOptions: MarkdownToJSXOptions = {
 
 const prefix = "// Auto-generated using md2jsx\n\n";
 
+export function basicYamlParser(yaml: string): Record<string, any> {
+    const metadata: Record<string, any> = {};
+    const frontMatterLinePattern = /^\s*(\w+)\s*:\s*(([^\[\]]+)|(\[(([^\[\]]+)*)\]))\s*$/;
+    for (const line of yaml.split("\n")) {
+        const lineMatches = frontMatterLinePattern.exec(line);
+        if (!lineMatches) {
+            throw new Error(`Invalid front matter line (${line.length}): ${line}`);
+        }
+
+        const [_entireLine, key, _entireValue, stringValue, _entireArray, arrayValue] = lineMatches;
+        metadata[key.trim()] = stringValue ? stringValue.trim() : arrayValue.split(",").map(v => v.trim());
+    }
+    return metadata;
+}
+
 export function markdownToJSX(md: string, options?: MarkdownToJSXOptions): string {
+    let markdown = md;
+    let extra = "";
+
+    if (options?.parseFrontMatter) {
+        const result = parseFrontMatter(md, options.parseFrontMatter);
+        markdown = result.markdown;
+        extra = `\nexport const metadata = ${JSON.stringify(result.metadata, undefined, 4)};\n`;
+    }
+
     if (options?.template) {
         marked.setOptions(marked.getDefaults());
         marked.setOptions(markedOptionsDefault);
@@ -61,10 +102,10 @@ export function markdownToJSX(md: string, options?: MarkdownToJSXOptions): strin
                 },
             ],
         });
-        return `${prefix}export default (context = null) => <>\n${marked.parse(md)}</>;\n`;
+        return `${prefix}export default (context = null) => <>\n${marked.parse(markdown)}</>;\n${extra}`;
     } else {
         marked.setOptions(marked.getDefaults());
         marked.setOptions(markedOptionsDefault);
-        return `${prefix}export default <>\n${marked.parse(md)}</>;\n`;
+        return `${prefix}export default <>\n${marked.parse(markdown)}</>;\n${extra}`;
     }
 }

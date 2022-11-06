@@ -7,6 +7,7 @@ Features:
 
 * Ahead-of-time/build-time conversion of Markdown to JSX
 * Preserves whitespace in codeblocks (simply copy-pasting to JSX *doesn't* preserve whitespace--this was the original motivation for creating md2jsx)
+* Support for parsing front matter metadata
 * Limited template support for inserting values into JSX at run-time
 
 ## Command line interface
@@ -19,12 +20,13 @@ npx md2jsx [options] < input.md > output.jsx
 Options:
 
 * `-t`: Enable template support (this returns a function instead of plain old JSX--see documentation below)
+* `-y`: Parse a limited subset of YAML (strings and string arrays) from front matter (fenced by `---`) -- use the API if you want to supply a custom parser (e.g. a full-fledged YAML/TOML parser)
 
 ## API
 The API operates on strings and is just one function:
 
 ```ts
-export declare function markdownToJSX(md: string, options?: { template?: boolean; }): string;
+export declare function markdownToJSX(md: string, options?: { template?: boolean; parseFrontMatter?: (text: string) => Record<string, any> }): string;
 ```
 
 ## Example
@@ -58,6 +60,38 @@ export default <>
 ```
 
 You can write the output to a file by redirecting standard output (e.g. `> output.jsx` in most shells).
+
+## Front matter example
+md2jsx supports parsing front matter (fenced by `---`) and exporting it as a second `metadata` export from the output module.
+
+For robustness, consider supplying a full-fledged YAML (or TOML) parser, but md2jsx comes with a (very) limited YAML parser that supports a flat map of strings to `string | string[]` (this is exported from md2jsx as `basicYamlParser`). Note: this limited YAML parser is what is used on the command line with the `-y` flag.
+
+Given this input:
+
+```md
+---
+to: Peter
+subject: Did you get that memo?
+---
+Just checking. Thanks.
+```
+
+Run the tool `npx md2jsx -y < frontmatter.md > frontmatter.jsx`
+
+Output:
+
+```jsx
+// Auto-generated using md2jsx
+
+export default <>
+<p>Just checking. Thanks.</p>
+</>;
+
+export const metadata = {
+    "to": "Peter",
+    "subject": "Did you get that memo?"
+};
+```
 
 ## Template example
 md2jsx also has some rudimentary support for inserting values (identified in the Markdown input via `{{someProperty}}`) into the resulting JSX at run time (a.k.a. templates):

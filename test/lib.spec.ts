@@ -1,10 +1,10 @@
-import { markdownToJSX } from "../src/lib";
+import { basicYamlParser, markdownToJSX } from "../src/lib";
 import * as assert from "assert";
 
 const prefix = "// Auto-generated using md2jsx\n\n";
 
-function createExpected(jsx: string): string {
-    return `${prefix}export default <>\n${jsx}\n</>;\n`;
+function createExpected(jsx: string, metadata?: string): string {
+    return `${prefix}export default <>\n${jsx}\n</>;\n${metadata ? `\nexport const metadata = ${metadata};\n` : ""}`;
 }
 
 function createExpectedTemplate(jsx: string): string {
@@ -48,4 +48,17 @@ for (let i = 0; i < array.length; i++) {
     // it("Substitution in fenced code", function() {
     //     assert.equal(markdownToJSX("```\nHello, {{name}}!\n```", { template: true }), createExpectedTemplate("<pre><code>Hello, {context.name}!</code></pre>"));
     // });
+
+    it("Front matter", function () {
+        assert.equal(markdownToJSX(
+`---
+string: Some value to trim
+stringArray: [ value1, value 2 to trim]
+---
+Hi
+`, { parseFrontMatter: basicYamlParser }), createExpected("<p>Hi</p>", JSON.stringify({
+    string: "Some value to trim",
+    stringArray: [ "value1", "value 2 to trim" ],
+}, undefined, 4)));
+    });
 });
